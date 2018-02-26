@@ -45,7 +45,7 @@ public:
             {
                 std::experimental::string_view* value = &piece[pos];
                 ByteBuffer val(value->size(), value->data());
-                std::shared_ptr<Value> buffer = string2Type[pos]->operation(val);
+                std::unique_ptr<Value> buffer = string2Type[pos]->operation(val);
                 _columns->at(pos)->put(buffer);
             }
 

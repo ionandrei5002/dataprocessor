@@ -2,7 +2,19 @@ cmake_minimum_required(VERSION 2.8)
 
 set(CMAKE_CXX_COMPILER g++)
 
-set(HEADERS types.h bytebuffer.h column.h array.h schema.h table.h builders.h reader.h operators.h value.h)
+set(HEADERS
+    types.h
+    bytebuffer.h
+    column.h
+    array.h
+    schema.h
+    table.h
+    builders.h
+    reader.h
+    writer.h
+    operators.h
+    value.h
+)
 
 project(DataProcessor)
 

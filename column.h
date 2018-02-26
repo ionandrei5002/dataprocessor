@@ -14,8 +14,8 @@ class Column
 {
 public:
     virtual ~Column() {}
-    virtual void put(std::shared_ptr<Value>& value) = 0;
-    virtual std::shared_ptr<Value> get(uint64_t position) = 0;
+    virtual void put(std::unique_ptr<Value>& value) = 0;
+    virtual std::unique_ptr<Value> get(uint64_t position) = 0;
 };
 
 class IsNullable
@@ -97,14 +97,14 @@ private:
 public:
     explicit TypedColumn() {}
     ~TypedColumn() {}
-    void put(std::shared_ptr<Value>& value) override
+    void put(std::unique_ptr<Value>& value) override
     {
         _store.put(value->getBuffer());
     }
-    std::shared_ptr<Value> get(uint64_t position) override
+    std::unique_ptr<Value> get(uint64_t position) override
     {
         uint64_t offset = position * sizeof(_type);
-        return std::make_shared<TypedValue<U>>(std::move(_store.get(offset, sizeof(_type))));
+        return std::make_unique<TypedValue<U>>(std::move(_store.get(offset, sizeof(_type))));
     }
 };
 
@@ -119,7 +119,7 @@ private:
 public:
     explicit TypedColumn() {}
     ~TypedColumn() {}
-    void put(std::shared_ptr<Value>& value) override
+    void put(std::unique_ptr<Value>& value) override
     {
         ByteBuffer value_size(sizeof(uint64_t), reinterpret_cast<char*>(&value->getBuffer()._size));
         uint64_t offset = _store.put(value_size);
@@ -127,7 +127,7 @@ public:
 
         _offsets.emplace_back(offset);
     }
-    std::shared_ptr<Value> get(uint64_t position) override
+    std::unique_ptr<Value> get(uint64_t position) override
     {
         uint64_t offset = _offsets[position];
 
@@ -136,7 +136,7 @@ public:
 
         ByteBuffer value = _store.get(offset + sizeof(uint64_t), size);
 
-        return std::make_shared<TypedValue<StringType>>(std::move(value));
+        return std::make_unique<TypedValue<StringType>>(std::move(value));
     }
 };
 
@@ -151,19 +151,19 @@ private:
 public:
     explicit TypedColumn() {}
     ~TypedColumn() {}
-    void put(std::shared_ptr<Value>& value) override
+    void put(std::unique_ptr<Value>& value) override
     {
         uint64_t offset = _store.put(value->getBuffer());
 
         _offsets.emplace_back(offset);
     }
-    std::shared_ptr<Value> get(uint64_t position) override
+    std::unique_ptr<Value> get(uint64_t position) override
     {
         uint64_t offset = _offsets[position];
 
         ByteBuffer value = _store.get(offset, sizeof(ByteBuffer));
 
-        return std::make_shared<TypedValue<StringType>>(std::move(value));
+        return std::make_unique<TypedValue<StringType>>(std::move(value));
     }
 };
 
@@ -177,7 +177,7 @@ private:
 public:
     explicit NullableTypedColumn() {}
     ~NullableTypedColumn() {}
-    void put(std::shared_ptr<Value>& value) override
+    void put(std::unique_ptr<Value>& value) override
     {
         _store.put(value->getBuffer());
         NullableTypedValue<U>* null = static_cast<NullableTypedValue<U>*>(value.get());
@@ -188,10 +188,10 @@ public:
             this->setNull(false);
         }
     }
-    std::shared_ptr<Value> get(uint64_t position) override
+    std::unique_ptr<Value> get(uint64_t position) override
     {
         uint64_t offset = position * sizeof(_type);
-        return std::make_shared<NullableTypedValue<U>>(std::move(_store.get(offset, sizeof(_type))));
+        return std::make_unique<NullableTypedValue<U>>(std::move(_store.get(offset, sizeof(_type))));
     }
     void setNull(bool value) override
     {
@@ -214,7 +214,7 @@ private:
 public:
     explicit NullableTypedColumn() {}
     ~NullableTypedColumn() {}
-    void put(std::shared_ptr<Value>& value) override
+    void put(std::unique_ptr<Value>& value) override
     {
         ByteBuffer value_size(sizeof(uint64_t), reinterpret_cast<char*>(&value->getBuffer()._size));
         uint64_t offset = _store.put(value_size);
@@ -230,7 +230,7 @@ public:
             this->setNull(false);
         }
     }
-    std::shared_ptr<Value> get(uint64_t position) override
+    std::unique_ptr<Value> get(uint64_t position) override
     {
         uint64_t offset = _offsets[position];
 
@@ -239,7 +239,7 @@ public:
 
         ByteBuffer value = _store.get(offset + sizeof(uint64_t), size);
 
-        return std::make_shared<NullableTypedValue<StringType>>(std::move(value));
+        return std::make_unique<NullableTypedValue<StringType>>(std::move(value));
     }
     void setNull(bool value) override
     {
@@ -262,7 +262,7 @@ private:
 public:
     explicit NullableTypedColumn() {}
     ~NullableTypedColumn() {}
-    void put(std::shared_ptr<Value>& value) override
+    void put(std::unique_ptr<Value>& value) override
     {
         uint64_t offset = _store.put(value->getBuffer());
 
@@ -275,13 +275,13 @@ public:
             this->setNull(false);
         }
     }
-    std::shared_ptr<Value> get(uint64_t position) override
+    std::unique_ptr<Value> get(uint64_t position) override
     {
         uint64_t offset = _offsets[position];
 
         ByteBuffer value = _store.get(offset, sizeof(ByteBuffer));
 
-        return std::make_shared<NullableTypedValue<StringType>>(std::move(value));
+        return std::make_unique<NullableTypedValue<StringType>>(std::move(value));
     }
     void setNull(bool value) override
     {

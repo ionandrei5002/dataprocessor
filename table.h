@@ -9,6 +9,7 @@
 #include "builders.h"
 
 #include "reader.h"
+#include "writer.h"
 
 class Table
 {
@@ -31,6 +32,13 @@ public:
     {
         CsvReader reader(fileName, _schema, &_columns);
         reader.read();
+
+        return *this;
+    }
+    Table& WriteCsv(std::string fileName)
+    {
+        CsvWriter writer(fileName, _schema, &_columns);
+        writer.write();
 
         return *this;
     }

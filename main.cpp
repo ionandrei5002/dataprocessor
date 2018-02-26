@@ -10,7 +10,9 @@ int main()
     schema.push(Node("udid", Type::INT64, true)).push(Node("date", Type::STRING, true));
 
     Table table("MC5Dau", schema);
-    table.BuildTable().Read4Csv("/home/andrei/Desktop/MC5Dau.csv");
+    table.BuildTable()
+            .Read4Csv("/home/andrei/Desktop/MC5Dau.csv");
+//            .WriteCsv("/home/andrei/Desktop/output.csv");
 
     return 0;
 }

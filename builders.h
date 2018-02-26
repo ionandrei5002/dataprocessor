@@ -202,4 +202,70 @@ static std::unique_ptr<UnaryOperator> String2TypeBuilder(Node node)
     }
 }
 
+static std::unique_ptr<UnaryOperator> Type2StringBuilder(Node node)
+{
+    Type::type _type = node.getType();
+    bool _nullable = node.isNullable();
+
+    if (_nullable == false)
+    {
+        switch (_type) {
+        case Type::INT8:
+            return std::make_unique<ToStringCast<Int8Type>>();
+            break;
+        case Type::INT16:
+            return std::make_unique<ToStringCast<Int16Type>>();
+            break;
+        case Type::INT32:
+            return std::make_unique<ToStringCast<Int32Type>>();
+            break;
+        case Type::INT64:
+            return std::make_unique<ToStringCast<Int64Type>>();
+            break;
+        case Type::FLOAT:
+            return std::make_unique<ToStringCast<FloatType>>();
+            break;
+        case Type::DOUBLE:
+            return std::make_unique<ToStringCast<DoubleType>>();
+            break;
+        case Type::STRING:
+            return std::make_unique<ToStringCast<StringType>>();
+            break;
+        default:
+            return nullptr;
+            break;
+        }
+    }
+
+    if (_nullable == true)
+    {
+        switch (_type) {
+        case Type::INT8:
+            return std::make_unique<ToStringCast<Int8Type>>();
+            break;
+        case Type::INT16:
+            return std::make_unique<ToStringCast<Int16Type>>();
+            break;
+        case Type::INT32:
+            return std::make_unique<ToStringCast<Int32Type>>();
+            break;
+        case Type::INT64:
+            return std::make_unique<ToStringCast<Int64Type>>();
+            break;
+        case Type::FLOAT:
+            return std::make_unique<ToStringCast<FloatType>>();
+            break;
+        case Type::DOUBLE:
+            return std::make_unique<ToStringCast<DoubleType>>();
+            break;
+        case Type::STRING:
+            return std::make_unique<ToStringCast<StringType>>();
+            break;
+        default:
+            return nullptr;
+            break;
+        }
+    }
+}
+
 #endif // BUILDERS_H
