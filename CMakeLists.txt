@@ -20,15 +20,17 @@ project(DataProcessor)
 
 add_executable(${PROJECT_NAME} main.cpp ${HEADERS})
 
+target_link_libraries(${PROJECT_NAME} tcmalloc)
+
 target_compile_options(${PROJECT_NAME}
   PRIVATE
     -flto
     -march=native
     -m64
     -std=c++17
-#    -O3
-    -O
-    -g3
+    -O3
+#    -O
+#    -g3
     -floop-parallelize-all
     -ftree-parallelize-loops=4
 )
