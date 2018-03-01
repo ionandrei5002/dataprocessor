@@ -5,6 +5,7 @@
 #include "column.h"
 #include "schema.h"
 #include "operators.h"
+#include "comparator.h"
 
 static std::unique_ptr<Column> ColumnBuilder(Node node)
 {
@@ -268,4 +269,68 @@ static std::unique_ptr<UnaryOperator> Type2StringBuilder(Node node)
     }
 }
 
+static std::unique_ptr<Comparator> ComparatorBuilder(Column* column, Node node)
+{
+    Type::type _type = node.getType();
+    bool _nullable = node.isNullable();
+
+    if (_nullable == false)
+    {
+        switch (_type) {
+        case Type::INT8:
+            return std::make_unique<TypedComparator<Int8Type>>(column);
+            break;
+        case Type::INT16:
+            return std::make_unique<TypedComparator<Int16Type>>(column);
+            break;
+        case Type::INT32:
+            return std::make_unique<TypedComparator<Int32Type>>(column);
+            break;
+        case Type::INT64:
+            return std::make_unique<TypedComparator<Int64Type>>(column);
+            break;
+        case Type::FLOAT:
+            return std::make_unique<TypedComparator<FloatType>>(column);
+            break;
+        case Type::DOUBLE:
+            return std::make_unique<TypedComparator<DoubleType>>(column);
+            break;
+        case Type::STRING:
+            return std::make_unique<TypedComparator<StringType>>(column);
+            break;
+        default:
+            return nullptr;
+            break;
+        }
+    }
+    if (_nullable == true)
+    {
+        switch (_type) {
+        case Type::INT8:
+            return std::make_unique<NullableTypedComparator<Int8Type>>(column);
+            break;
+        case Type::INT16:
+            return std::make_unique<NullableTypedComparator<Int16Type>>(column);
+            break;
+        case Type::INT32:
+            return std::make_unique<NullableTypedComparator<Int32Type>>(column);
+            break;
+        case Type::INT64:
+            return std::make_unique<NullableTypedComparator<Int64Type>>(column);
+            break;
+        case Type::FLOAT:
+            return std::make_unique<NullableTypedComparator<FloatType>>(column);
+            break;
+        case Type::DOUBLE:
+            return std::make_unique<NullableTypedComparator<DoubleType>>(column);
+            break;
+        case Type::STRING:
+            return std::make_unique<NullableTypedComparator<StringType>>(column);
+            break;
+        default:
+            return nullptr;
+            break;
+        }
+    }
+}
 #endif // BUILDERS_H

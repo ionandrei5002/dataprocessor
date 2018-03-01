@@ -21,8 +21,10 @@ private:
 public:
     CsvReader(std::string fileName, Schema schema, std::vector<std::unique_ptr<Column>>* columns)
         :_fileName(fileName),_schema(schema),_columns(columns) {}
-    void read()
+    uint64_t read()
     {
+        uint64_t rowsRead = 0;
+
         std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
         start = std::chrono::high_resolution_clock::now();
 
@@ -50,12 +52,16 @@ public:
             }
 
             piece.clear();
+
+            rowsRead++;
         }
 
         end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsed_time = end - start;
 
         std::cout << "read duration = " << elapsed_time.count() << "s" << std::endl;
+
+        return rowsRead;
     }
 private:
     void split(std::vector<std::experimental::string_view>& results, std::string const& original, char separator)

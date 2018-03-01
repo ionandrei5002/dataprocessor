@@ -10,12 +10,14 @@ protected:
     Type::type _type;
 public:
     virtual ~Value() {}
-    virtual std::shared_ptr<Value> get() = 0;
-    virtual void set(std::shared_ptr<Value> value) = 0;
+    virtual std::unique_ptr<Value> get() = 0;
+    virtual void set(std::unique_ptr<Value>& value) = 0;
     virtual ByteBuffer& getBuffer() = 0;
     virtual Type::type getType() = 0;
-    virtual bool operator <(const std::shared_ptr<Value> value) = 0;
-    virtual bool operator >(const std::shared_ptr<Value> value) = 0;
+//    virtual bool operator ==(const std::unique_ptr<Value>& value) = 0;
+//    virtual bool operator !=(const std::unique_ptr<Value>& value) = 0;
+//    virtual bool operator <(const std::unique_ptr<Value>& value) = 0;
+//    virtual bool operator >(const std::unique_ptr<Value>& value) = 0;
 };
 
 class isNull
@@ -35,15 +37,15 @@ private:
     ByteBuffer _buffer;
 public:
     explicit TypedValue(ByteBuffer value):_buffer(std::move(value)) {}
-    std::shared_ptr<Value> get() override
+    std::unique_ptr<Value> get() override
     {
-        return std::make_shared<TypedValue<T>>(_buffer);
+        return std::make_unique<TypedValue<T>>(_buffer);
     }
-    void set(std::shared_ptr<Value> value) override
+    void set(std::unique_ptr<Value>& value) override
     {
         this->_buffer = value->getBuffer();
     }
-    ByteBuffer& getBuffer()
+    ByteBuffer& getBuffer() override
     {
         return this->_buffer;
     }
@@ -51,15 +53,25 @@ public:
     {
         return T::type_num;
     }
-    bool operator <(const std::shared_ptr<Value> value) override
+    bool operator ==(TypedValue<T>& value)
     {
         typedef typename T::c_type _val;
-        return *reinterpret_cast<_val*>(this->_buffer._data) < *reinterpret_cast<_val*>(value->getBuffer()._data);
+        return *reinterpret_cast<_val*>(this->_buffer._data) == *reinterpret_cast<_val*>(value.getBuffer()._data);
     }
-    bool operator >(const std::shared_ptr<Value> value) override
+    bool operator !=(TypedValue<T>& value)
     {
         typedef typename T::c_type _val;
-        return *reinterpret_cast<_val*>(this->_buffer._data) > *reinterpret_cast<_val*>(value->getBuffer()._data);
+        return *reinterpret_cast<_val*>(this->_buffer._data) != *reinterpret_cast<_val*>(value.getBuffer()._data);
+    }
+    bool operator <(TypedValue<T>& value)
+    {
+        typedef typename T::c_type _val;
+        return *reinterpret_cast<_val*>(this->_buffer._data) < *reinterpret_cast<_val*>(value.getBuffer()._data);
+    }
+    bool operator >(TypedValue<T>& value)
+    {
+        typedef typename T::c_type _val;
+        return *reinterpret_cast<_val*>(this->_buffer._data) > *reinterpret_cast<_val*>(value.getBuffer()._data);
     }
 };
 
@@ -70,11 +82,11 @@ private:
     ByteBuffer _buffer;
 public:
     explicit NullableTypedValue(ByteBuffer value):_buffer(std::move(value)) {}
-    std::shared_ptr<Value> get() override
+    std::unique_ptr<Value> get() override
     {
-        return std::make_shared<TypedValue<T>>(_buffer);
+        return std::make_unique<NullableTypedValue<T>>(_buffer);
     }
-    void set(std::shared_ptr<Value> value) override
+    void set(std::unique_ptr<Value>& value) override
     {
         this->_buffer = value->getBuffer();
     }
@@ -88,15 +100,25 @@ public:
     }
     void setNull() override { this->_null = true; }
     bool getNull() override { return this->_null; }
-    bool operator <(const std::shared_ptr<Value> value) override
+    bool operator ==(NullableTypedValue<T>& value)
     {
         typedef typename T::c_type _val;
-        return *reinterpret_cast<_val*>(this->_buffer._data) < *reinterpret_cast<_val*>(value->getBuffer()._data);
+        return *reinterpret_cast<_val*>(this->_buffer._data) == *reinterpret_cast<_val*>(value.getBuffer()._data);
     }
-    bool operator >(const std::shared_ptr<Value> value) override
+    bool operator !=(NullableTypedValue<T>& value)
     {
         typedef typename T::c_type _val;
-        return *reinterpret_cast<_val*>(this->_buffer._data) > *reinterpret_cast<_val*>(value->getBuffer()._data);
+        return *reinterpret_cast<_val*>(this->_buffer._data) != *reinterpret_cast<_val*>(value.getBuffer()._data);
+    }
+    bool operator <(NullableTypedValue<T>& value)
+    {
+        typedef typename T::c_type _val;
+        return *reinterpret_cast<_val*>(this->_buffer._data) < *reinterpret_cast<_val*>(value.getBuffer()._data);
+    }
+    bool operator >(NullableTypedValue<T>& value)
+    {
+        typedef typename T::c_type _val;
+        return *reinterpret_cast<_val*>(this->_buffer._data) > *reinterpret_cast<_val*>(value.getBuffer()._data);
     }
 };
 
@@ -107,11 +129,11 @@ private:
     ByteBuffer _buffer;
 public:
     explicit TypedValue(ByteBuffer value):_buffer(std::move(value)) {}
-    std::shared_ptr<Value> get() override
+    std::unique_ptr<Value> get() override
     {
-        return std::make_shared<TypedValue<StringType>>(_buffer);
+        return std::make_unique<TypedValue<StringType>>(_buffer);
     }
-    void set(std::shared_ptr<Value> value) override
+    void set(std::unique_ptr<Value>& value) override
     {
         this->_buffer = value->getBuffer();
     }
@@ -123,13 +145,21 @@ public:
     {
         return StringType::type_num;
     }
-    bool operator <(const std::shared_ptr<Value> value) override
+    bool operator ==(TypedValue<StringType>& value)
     {
-//        return this->_buffer < value->getBuffer();
+        return this->_buffer == value.getBuffer();
     }
-    bool operator >(const std::shared_ptr<Value> value) override
+    bool operator !=(TypedValue<StringType>& value)
     {
-//        return this->_buffer > value->getBuffer();
+        return this->_buffer != value.getBuffer();
+    }
+    bool operator <(TypedValue<StringType>& value)
+    {
+        return this->_buffer < value.getBuffer();
+    }
+    bool operator >(TypedValue<StringType>& value)
+    {
+        return this->_buffer > value.getBuffer();
     }
 };
 
@@ -140,11 +170,11 @@ private:
     ByteBuffer _buffer;
 public:
     explicit NullableTypedValue(ByteBuffer value):_buffer(std::move(value)) {}
-    std::shared_ptr<Value> get() override
+    std::unique_ptr<Value> get() override
     {
-        return std::make_shared<TypedValue<StringType>>(_buffer);
+        return std::make_unique<NullableTypedValue<StringType>>(_buffer);
     }
-    void set(std::shared_ptr<Value> value) override
+    void set(std::unique_ptr<Value>& value) override
     {
         this->_buffer = value->getBuffer();
     }
@@ -158,13 +188,21 @@ public:
     }
     void setNull() override { this->_null = true; }
     bool getNull() override { return this->_null; }
-    bool operator <(const std::shared_ptr<Value> value) override
+    bool operator ==(NullableTypedValue<StringType>& value)
     {
-//        return this->_buffer < value->getBuffer();
+        return this->_buffer == value.getBuffer();
     }
-    bool operator >(const std::shared_ptr<Value> value) override
+    bool operator !=(NullableTypedValue<StringType>& value)
     {
-//        return this->_buffer > value->getBuffer();
+        return this->_buffer != value.getBuffer();
+    }
+    bool operator <(NullableTypedValue<StringType>& value)
+    {
+        return this->_buffer < value.getBuffer();
+    }
+    bool operator >(NullableTypedValue<StringType>& value)
+    {
+        return this->_buffer > value.getBuffer();
     }
 };
 

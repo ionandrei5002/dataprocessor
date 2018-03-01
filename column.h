@@ -16,6 +16,7 @@ public:
     virtual ~Column() {}
     virtual void put(std::unique_ptr<Value>& value) = 0;
     virtual std::unique_ptr<Value> get(uint64_t position) = 0;
+    virtual ViewByteBuffer getView(uint64_t position) = 0;
 };
 
 class IsNullable
@@ -34,6 +35,7 @@ public:
     virtual ~Storage() {}
     virtual uint64_t put(ByteBuffer& value) = 0;
     virtual ByteBuffer get(uint64_t offset, uint64_t type_size) = 0;
+    virtual ViewByteBuffer getView(uint64_t offset, uint64_t type_size) = 0;
 };
 
 template<typename T>
@@ -56,6 +58,11 @@ public:
     ByteBuffer get(uint64_t offset, uint64_t type_size) override
     {
         ByteBuffer value(type_size, _data.get(offset));
+        return value;
+    }
+    ViewByteBuffer getView(uint64_t offset, uint64_t type_size) override
+    {
+        ViewByteBuffer value(type_size, _data.get(offset));
         return value;
     }
 };
@@ -85,6 +92,10 @@ public:
     {
         return *_position.at(offset);
     }
+    ViewByteBuffer getView(uint64_t offset, uint64_t type_size) override
+    {
+        return ViewByteBuffer(*_position.at(offset));
+    }
 };
 
 template<typename T, typename U>
@@ -105,6 +116,11 @@ public:
     {
         uint64_t offset = position * sizeof(_type);
         return std::make_unique<TypedValue<U>>(std::move(_store.get(offset, sizeof(_type))));
+    }
+    ViewByteBuffer getView(uint64_t position) override
+    {
+        uint64_t offset = position * sizeof(_type);
+        return _store.getView(offset, sizeof(_type));
     }
 };
 
@@ -138,6 +154,17 @@ public:
 
         return std::make_unique<TypedValue<StringType>>(std::move(value));
     }
+    ViewByteBuffer getView(uint64_t position) override
+    {
+        uint64_t offset = _offsets[position];
+
+        ViewByteBuffer value_size = _store.getView(offset, sizeof(uint64_t));
+        uint64_t size = *reinterpret_cast<uint64_t*>(value_size._data);
+
+        ViewByteBuffer value = _store.getView(offset + sizeof(uint64_t), size);
+
+        return value;
+    }
 };
 
 template<>
@@ -164,6 +191,14 @@ public:
         ByteBuffer value = _store.get(offset, sizeof(ByteBuffer));
 
         return std::make_unique<TypedValue<StringType>>(std::move(value));
+    }
+    ViewByteBuffer getView(uint64_t position) override
+    {
+        uint64_t offset = _offsets[position];
+
+        ViewByteBuffer value = _store.getView(offset, sizeof(ByteBuffer));
+
+        return value;
     }
 };
 
@@ -192,6 +227,11 @@ public:
     {
         uint64_t offset = position * sizeof(_type);
         return std::make_unique<NullableTypedValue<U>>(std::move(_store.get(offset, sizeof(_type))));
+    }
+    ViewByteBuffer getView(uint64_t position) override
+    {
+        uint64_t offset = position * sizeof(_type);
+        return _store.getView(offset, sizeof(_type));
     }
     void setNull(bool value) override
     {
@@ -241,6 +281,17 @@ public:
 
         return std::make_unique<NullableTypedValue<StringType>>(std::move(value));
     }
+    ViewByteBuffer getView(uint64_t position) override
+    {
+        uint64_t offset = _offsets[position];
+
+        ViewByteBuffer value_size = _store.getView(offset, sizeof(uint64_t));
+        uint64_t size = *reinterpret_cast<uint64_t*>(value_size._data);
+
+        ViewByteBuffer value = _store.getView(offset + sizeof(uint64_t), size);
+
+        return value;
+    }
     void setNull(bool value) override
     {
         _nulls.push_back(value);
@@ -282,6 +333,14 @@ public:
         ByteBuffer value = _store.get(offset, sizeof(ByteBuffer));
 
         return std::make_unique<NullableTypedValue<StringType>>(std::move(value));
+    }
+    ViewByteBuffer getView(uint64_t position) override
+    {
+        uint64_t offset = _offsets[position];
+
+        ViewByteBuffer value = _store.getView(offset, sizeof(ByteBuffer));
+
+        return value;
     }
     void setNull(bool value) override
     {

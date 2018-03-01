@@ -20,7 +20,7 @@ private:
 public:
     CsvWriter(std::string fileName, Schema schema, std::vector<std::unique_ptr<Column>>* columns)
         :_fileName(fileName),_schema(schema),_columns(columns) {}
-    void write()
+    void write(std::vector<uint64_t>& rowsSorting)
     {
         std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
         start = std::chrono::high_resolution_clock::now();
@@ -33,14 +33,14 @@ public:
 
         std::ofstream out(_fileName);
 
-        for(uint64_t pos = 0; pos < 16353154; ++pos)
+        for(uint64_t pos = 0; pos < rowsSorting.size(); ++pos)
         {
             for(uint64_t col = 0; col < (_columns->size() - 1); ++col)
             {
-                std::unique_ptr<Value> value = _columns->at(col)->get(pos);
+                std::unique_ptr<Value> value = _columns->at(col)->get(rowsSorting[pos]);
                 out << type2String.at(col)->operation(value->getBuffer())->getBuffer() << ",";
             }
-            std::unique_ptr<Value> value = _columns->at(_columns->size() - 1)->get(pos);
+            std::unique_ptr<Value> value = _columns->at(_columns->size() - 1)->get(rowsSorting[pos]);
             out << type2String.at(_columns->size() - 1)->operation(value->getBuffer())->getBuffer() << std::endl;
         }
 
