@@ -6,6 +6,7 @@
 #include "schema.h"
 #include "operators.h"
 #include "comparator.h"
+#include "aggregators.h"
 
 static std::unique_ptr<Column> ColumnBuilder(Node node)
 {
@@ -333,4 +334,71 @@ static std::unique_ptr<Comparator> ComparatorBuilder(Column* column, Node node)
         }
     }
 }
+
+static std::shared_ptr<Aggregator> AggregatorBuilder(Node node, AggType::type aggregate)
+{
+    Type::type _type = node.getType();
+    switch (aggregate) {
+    case AggType::NONE:
+        switch (_type) {
+        case Type::INT8:
+            return std::make_shared<None<Int8Type>>();
+            break;
+        case Type::INT16:
+            return std::make_shared<None<Int16Type>>();
+            break;
+        case Type::INT32:
+            return std::make_shared<None<Int32Type>>();
+            break;
+        case Type::INT64:
+            return std::make_shared<None<Int64Type>>();
+            break;
+        case Type::FLOAT:
+            return std::make_shared<None<FloatType>>();
+            break;
+        case Type::DOUBLE:
+            return std::make_shared<None<DoubleType>>();
+            break;
+        case Type::STRING:
+            return std::make_shared<None<StringType>>();
+            break;
+        default:
+            return nullptr;
+            break;
+        }
+        break;
+    case AggType::DISTINCTC_COUNT:
+        switch (_type) {
+        case Type::INT8:
+            return std::make_shared<DistinctCounter<Int8Type>>();
+            break;
+        case Type::INT16:
+            return std::make_shared<DistinctCounter<Int16Type>>();
+            break;
+        case Type::INT32:
+            return std::make_shared<DistinctCounter<Int32Type>>();
+            break;
+        case Type::INT64:
+            return std::make_shared<DistinctCounter<Int64Type>>();
+            break;
+        case Type::FLOAT:
+            return std::make_shared<DistinctCounter<FloatType>>();
+            break;
+        case Type::DOUBLE:
+            return std::make_shared<DistinctCounter<DoubleType>>();
+            break;
+        case Type::STRING:
+            return std::make_shared<DistinctCounter<StringType>>();
+            break;
+        default:
+            return nullptr;
+            break;
+        }
+        break;
+    default:
+        return nullptr;
+        break;
+    }
+}
+
 #endif // BUILDERS_H

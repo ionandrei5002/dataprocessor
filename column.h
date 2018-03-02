@@ -57,8 +57,7 @@ public:
     }
     ByteBuffer get(uint64_t offset, uint64_t type_size) override
     {
-        ByteBuffer value(type_size, _data.get(offset));
-        return value;
+        return std::move(ByteBuffer(type_size, _data.get(offset)));
     }
     ViewByteBuffer getView(uint64_t offset, uint64_t type_size) override
     {

@@ -36,6 +36,7 @@ class TypedValue: public Value
 private:
     ByteBuffer _buffer;
 public:
+    TypedValue() {}
     explicit TypedValue(ByteBuffer value):_buffer(std::move(value)) {}
     std::unique_ptr<Value> get() override
     {
@@ -73,6 +74,10 @@ public:
         typedef typename T::c_type _val;
         return *reinterpret_cast<_val*>(this->_buffer._data) > *reinterpret_cast<_val*>(value.getBuffer()._data);
     }
+    friend bool operator<(const TypedValue<T>& lv, const TypedValue<T>& rv)
+    {
+        return lv < rv;
+    }
 };
 
 template<typename T>
@@ -81,6 +86,7 @@ class NullableTypedValue: public Value, public isNull
 private:
     ByteBuffer _buffer;
 public:
+    NullableTypedValue() {}
     explicit NullableTypedValue(ByteBuffer value):_buffer(std::move(value)) {}
     std::unique_ptr<Value> get() override
     {
@@ -120,6 +126,10 @@ public:
         typedef typename T::c_type _val;
         return *reinterpret_cast<_val*>(this->_buffer._data) > *reinterpret_cast<_val*>(value.getBuffer()._data);
     }
+    friend bool operator<(const NullableTypedValue<T>& lv, const NullableTypedValue<T>& rv)
+    {
+        return lv < rv;
+    }
 };
 
 template<>
@@ -128,6 +138,7 @@ class TypedValue<StringType>: public Value
 private:
     ByteBuffer _buffer;
 public:
+    TypedValue() {}
     explicit TypedValue(ByteBuffer value):_buffer(std::move(value)) {}
     std::unique_ptr<Value> get() override
     {
@@ -161,6 +172,10 @@ public:
     {
         return this->_buffer > value.getBuffer();
     }
+    friend bool operator<(const TypedValue<StringType>& lv, const TypedValue<StringType>& rv)
+    {
+        return lv < rv;
+    }
 };
 
 template<>
@@ -169,6 +184,7 @@ class NullableTypedValue<StringType>: public Value, public isNull
 private:
     ByteBuffer _buffer;
 public:
+    NullableTypedValue() {}
     explicit NullableTypedValue(ByteBuffer value):_buffer(std::move(value)) {}
     std::unique_ptr<Value> get() override
     {
@@ -203,6 +219,10 @@ public:
     bool operator >(NullableTypedValue<StringType>& value)
     {
         return this->_buffer > value.getBuffer();
+    }
+    friend bool operator<(const NullableTypedValue<StringType>& lv, const NullableTypedValue<StringType>& rv)
+    {
+        return lv < rv;
     }
 };
 

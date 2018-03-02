@@ -13,8 +13,8 @@ private:
 public:
     Array()
     {
-        _data = new char[1024*1024];
-        _capacity = 1024*1024;
+        _data = new char[16];
+        _capacity = 16;
         _size = 0;
     }
     inline void emplace_back(uint64_t size, const char* data)

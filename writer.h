@@ -37,11 +37,11 @@ public:
         {
             for(uint64_t col = 0; col < (_columns->size() - 1); ++col)
             {
-                std::unique_ptr<Value> value = _columns->at(col)->get(rowsSorting[pos]);
-                out << type2String.at(col)->operation(value->getBuffer())->getBuffer() << ",";
+                ViewByteBuffer value = _columns->at(col)->getView(rowsSorting[pos]);
+                out << type2String.at(col)->operation(value)->getBuffer() << ",";
             }
-            std::unique_ptr<Value> value = _columns->at(_columns->size() - 1)->get(rowsSorting[pos]);
-            out << type2String.at(_columns->size() - 1)->operation(value->getBuffer())->getBuffer() << std::endl;
+            ViewByteBuffer value = _columns->at(_columns->size() - 1)->getView(rowsSorting[pos]);
+            out << type2String.at(_columns->size() - 1)->operation(value)->getBuffer() << std::endl;
         }
 
         end = std::chrono::high_resolution_clock::now();

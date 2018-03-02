@@ -80,6 +80,10 @@ public:
 
         return out;
     }
+    friend bool operator<(const ByteBuffer& lv, const ByteBuffer& rv)
+    {
+        return std::experimental::string_view(lv._data, lv._size) < std::experimental::string_view(rv._data, rv._size);
+    }
 };
 
 class ViewByteBuffer
@@ -145,6 +149,10 @@ public:
 
         return out;
     }
+    friend bool operator<(const ViewByteBuffer& lv, const ViewByteBuffer& rv)
+    {
+        return std::experimental::string_view(lv._data, lv._size) < std::experimental::string_view(rv._data, rv._size);
+    }
 };
 
 ByteBuffer::ByteBuffer(ViewByteBuffer &ot)
@@ -157,18 +165,6 @@ ViewByteBuffer::ViewByteBuffer(ByteBuffer& ot)
 {
     _size = ot._size;
     _data = ot._data;
-}
-
-namespace std
-{
-    bool operator<(const ByteBuffer& lv, const ByteBuffer& rv)
-    {
-        return std::experimental::string_view(lv._data, lv._size) < std::experimental::string_view(rv._data, rv._size);
-    }
-    bool operator<(const ViewByteBuffer& lv, const ViewByteBuffer& rv)
-    {
-        return std::experimental::string_view(lv._data, lv._size) < std::experimental::string_view(rv._data, rv._size);
-    }
 }
 
 #endif // BYTEBUFFER_H

@@ -15,6 +15,8 @@ set(HEADERS
     operators.h
     value.h
     comparator.h
+    aggregators.h
+    groupby.h
 )
 
 project(DataProcessor)

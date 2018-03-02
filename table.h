@@ -15,6 +15,8 @@
 
 #include "comparator.h"
 
+class GroupBy;
+
 class Table
 {
 private:
@@ -25,6 +27,7 @@ private:
     std::vector<uint64_t> _rowsSorting;
 public:
     Table(std::string tableName, Schema schema):_tableName(tableName),_schema(schema) {}
+    friend class GroupBy;
     Table& BuildTable()
     {
         for(uint64_t pos = 0; pos < _schema.size(); ++pos)
@@ -44,7 +47,7 @@ public:
 
         return *this;
     }
-    Table& WriteCsv(std::string fileName)
+    Table& Write2Csv(std::string fileName)
     {
         CsvWriter writer(fileName, _schema, &_columns);
         writer.write(_rowsSorting);
@@ -75,7 +78,6 @@ public:
 private:
     void buildRowsSorting()
     {
-//        _rowsSorting.reserve(this->_rows);
         for(uint64_t pos = 0; pos < this->_rows; ++pos)
         {
             _rowsSorting.emplace_back(pos);

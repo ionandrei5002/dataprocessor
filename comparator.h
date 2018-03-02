@@ -61,7 +61,7 @@ public:
         {
             ViewByteBuffer vlv = _column->getView(lv);
             ViewByteBuffer vrv = _column->getView(rv);
-//            return vlv < vrv;
+
             return _children->operator ()(vlv, vrv);
         }
     } _sort;
