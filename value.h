@@ -14,10 +14,6 @@ public:
     virtual void set(std::unique_ptr<Value>& value) = 0;
     virtual ByteBuffer& getBuffer() = 0;
     virtual Type::type getType() = 0;
-//    virtual bool operator ==(const std::unique_ptr<Value>& value) = 0;
-//    virtual bool operator !=(const std::unique_ptr<Value>& value) = 0;
-//    virtual bool operator <(const std::unique_ptr<Value>& value) = 0;
-//    virtual bool operator >(const std::unique_ptr<Value>& value) = 0;
 };
 
 class isNull

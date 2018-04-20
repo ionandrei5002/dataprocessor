@@ -17,6 +17,7 @@ public:
     virtual void put(std::unique_ptr<Value>& value) = 0;
     virtual std::unique_ptr<Value> get(uint64_t position) = 0;
     virtual ViewByteBuffer getView(uint64_t position) = 0;
+    virtual void swap(uint64_t lv, uint64_t rv) = 0;
 };
 
 class IsNullable
@@ -36,6 +37,7 @@ public:
     virtual uint64_t put(ByteBuffer& value) = 0;
     virtual ByteBuffer get(uint64_t offset, uint64_t type_size) = 0;
     virtual ViewByteBuffer getView(uint64_t offset, uint64_t type_size) = 0;
+    virtual void swap(uint64_t lv, uint64_t rv, uint64_t type_size) = 0;
 };
 
 template<typename T>
@@ -57,12 +59,22 @@ public:
     }
     ByteBuffer get(uint64_t offset, uint64_t type_size) override
     {
-        return std::move(ByteBuffer(type_size, _data.get(offset)));
+        return ByteBuffer(type_size, _data.get(offset));
     }
     ViewByteBuffer getView(uint64_t offset, uint64_t type_size) override
     {
         ViewByteBuffer value(type_size, _data.get(offset));
         return value;
+    }
+    void swap(uint64_t lv, uint64_t rv, uint64_t type_size) override
+    {
+//        std::cout << _data.size() << " " << lv << " " << rv << std::endl;
+        std::vector<char> tmp;
+        tmp.resize(type_size);
+        memcpy(tmp.data(), _data.get(lv), type_size);
+
+        _data.rewrite(lv, type_size, _data.get(rv));
+        _data.rewrite(rv, type_size, tmp.data());
     }
 };
 
@@ -95,6 +107,8 @@ public:
     {
         return ViewByteBuffer(*_position.at(offset));
     }
+    void swap(uint64_t lv, uint64_t rv, uint64_t type_size) override
+    {}
 };
 
 template<typename T, typename U>
@@ -120,6 +134,10 @@ public:
     {
         uint64_t offset = position * sizeof(_type);
         return _store.getView(offset, sizeof(_type));
+    }
+    void swap(uint64_t lv, uint64_t rv) override
+    {
+        _store.swap((lv * sizeof(_type)), (rv * sizeof(_type)), sizeof(_type));
     }
 };
 
@@ -164,6 +182,12 @@ public:
 
         return value;
     }
+    void swap(uint64_t lv, uint64_t rv) override
+    {
+        uint64_t tmp = _offsets[lv];
+        _offsets[lv] = _offsets[rv];
+        _offsets[rv] = tmp;
+    }
 };
 
 template<>
@@ -199,6 +223,8 @@ public:
 
         return value;
     }
+    void swap(uint64_t lv, uint64_t rv) override
+    {}
 };
 
 template<typename T, typename U>
@@ -240,6 +266,8 @@ public:
     {
         return _nulls.at(position);
     }
+    void swap(uint64_t lv, uint64_t rv) override
+    {}
 };
 
 template<typename T>
@@ -299,6 +327,8 @@ public:
     {
         return _nulls.at(position);
     }
+    void swap(uint64_t lv, uint64_t rv) override
+    {}
 };
 
 template<>
@@ -349,6 +379,8 @@ public:
     {
         return _nulls.at(position);
     }
+    void swap(uint64_t lv, uint64_t rv) override
+    {}
 };
 
 #endif // COLUMN_H

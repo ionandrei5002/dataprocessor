@@ -57,12 +57,25 @@ public:
 
             return *this;
         }
-        bool operator()(const uint64_t lv, const uint64_t rv)
+        inline bool differit(const uint64_t lv, const uint64_t rv)
+        {
+            ViewByteBuffer vlv = _column->getView(lv);
+            ViewByteBuffer vrv = _column->getView(rv);
+
+            _children->set(vlv);
+
+            return _children->operator!=(vrv);
+        }
+        inline bool operator()(const uint64_t lv, const uint64_t rv)
         {
             ViewByteBuffer vlv = _column->getView(lv);
             ViewByteBuffer vrv = _column->getView(rv);
 
             return _children->operator ()(vlv, vrv);
+        }
+        inline void swap(const uint64_t lv, const uint64_t rv)
+        {
+            _column->swap(lv, rv);
         }
     } _sort;
 };
@@ -144,6 +157,28 @@ public:
     bool operator()(const ViewByteBuffer& lv, const ViewByteBuffer& rv) override
     {
         return lv < rv;
+    }
+};
+
+class Sorter {
+private:
+    std::vector<std::shared_ptr<Comparator>> _comparators;
+public:
+    Sorter(std::vector<std::shared_ptr<Comparator>> comparators):_comparators(comparators) {}
+    inline bool operator()(const uint64_t lv, const uint64_t rv) {
+        bool _comp = false;
+
+        for(auto it = _comparators.begin(); it != _comparators.end(); ++it)
+        {
+            if ((*it)->_sort.differit(lv,rv))
+            {
+                _comp = (*it)->_sort.operator ()(lv, rv);
+
+                return _comp;
+            }
+        }
+
+        return _comp;
     }
 };
 

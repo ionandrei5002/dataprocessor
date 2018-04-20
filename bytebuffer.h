@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <memory.h>
+#include <iostream>
 #include <experimental/string_view>
 
 class ViewByteBuffer;

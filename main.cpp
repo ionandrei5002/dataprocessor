@@ -13,7 +13,7 @@ int main()
     
     Table table("MC5Dau", schema);
     table.BuildTable()
-            .Read4Csv("/home/andrei/Desktop/MC5Dau.csv")
+            .Read4Csv("/home/andrei/Desktop/desktop/MC5Dau.csv")
             .sortTable(std::vector<uint64_t>({0,1}));
 //            .Write2Csv("/home/andrei/Desktop/output.csv");
 

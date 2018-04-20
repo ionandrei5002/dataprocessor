@@ -13,8 +13,8 @@ private:
 public:
     Array()
     {
-        _data = new char[16];
-        _capacity = 16;
+        _data = new char[1024*1024];
+        _capacity = 1024*1024;
         _size = 0;
     }
     inline void emplace_back(uint64_t size, const char* data)
@@ -28,6 +28,10 @@ public:
 
         memcpy(&_data[_size], data, size);
         _size += size;
+    }
+    inline void rewrite(uint64_t pos, uint64_t size, const char* data)
+    {
+        memcpy(&_data[pos], data, size);
     }
     inline char* get(uint64_t offset)
     {
