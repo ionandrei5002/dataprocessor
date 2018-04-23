@@ -17,7 +17,7 @@ public:
     virtual void put(std::unique_ptr<Value>& value) = 0;
     virtual std::unique_ptr<Value> get(uint64_t position) = 0;
     virtual ViewByteBuffer getView(uint64_t position) = 0;
-    virtual void swap(uint64_t lv, uint64_t rv) = 0;
+    virtual void swap(uint64_t lv, uint64_t rv);
 };
 
 class IsNullable
@@ -26,8 +26,8 @@ protected:
     std::vector<char> _nulls;
 public:
     virtual ~IsNullable() {}
-    virtual void setNull(bool value) = 0;
-    virtual bool getNull(uint64_t position) = 0;
+    virtual void setNull(bool value);
+    virtual bool getNull(uint64_t position);
 };
 
 class Storage
@@ -37,7 +37,7 @@ public:
     virtual uint64_t put(ByteBuffer& value) = 0;
     virtual ByteBuffer get(uint64_t offset, uint64_t type_size) = 0;
     virtual ViewByteBuffer getView(uint64_t offset, uint64_t type_size) = 0;
-    virtual void swap(uint64_t lv, uint64_t rv, uint64_t type_size, char* tmp) = 0;
+    virtual void swap(uint64_t lv, uint64_t rv, uint64_t type_size, char* tmp);
 };
 
 template<typename T>

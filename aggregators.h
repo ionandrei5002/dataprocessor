@@ -24,7 +24,7 @@ public:
     virtual void input(ViewByteBuffer &value) = 0;
     virtual void input(std::unique_ptr<Value> &value) = 0;
     virtual std::unique_ptr<Value> output() = 0;
-    virtual void reset() = 0;
+    virtual void reset();
     virtual Type::type inputType() = 0;
     virtual Type::type outputType() = 0;
 };

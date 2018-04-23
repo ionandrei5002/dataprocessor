@@ -21,7 +21,7 @@ set(HEADERS
 
 project(DataProcessor)
 
-add_executable(${PROJECT_NAME} main.cpp ${HEADERS})
+add_executable(${PROJECT_NAME} main.cpp aggregators.cpp column.cpp bytebuffer.cpp comparator.cpp operators.cpp value.cpp ${HEADERS})
 
 target_link_libraries(${PROJECT_NAME}
     tcmalloc
@@ -35,9 +35,9 @@ target_compile_options(${PROJECT_NAME}
     -march=native
     -m64
     -std=c++17
-    -O2
-#    -O
-    -g3
+#    -O2
+    -O3
+#    -g3
 #    -pg
     -floop-parallelize-all
     -ftree-parallelize-loops=4

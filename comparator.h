@@ -18,7 +18,7 @@ public:
     Comparator(Comparator&& ot):_sort(Sort(ot._sort._column, ot._sort._children)) {}
     Comparator& operator=(Comparator&& ot) = delete;
     virtual ~Comparator() {}
-    virtual Type::type getType() = 0;
+    virtual Type::type getType();
     virtual void set(const ViewByteBuffer& lv) = 0;
     virtual bool operator<(const ViewByteBuffer& rv) = 0;
     virtual bool operator>(const ViewByteBuffer& rv) = 0;

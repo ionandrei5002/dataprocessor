@@ -13,7 +13,7 @@ public:
     virtual std::unique_ptr<Value> get() = 0;
     virtual void set(std::unique_ptr<Value>& value) = 0;
     virtual ByteBuffer& getBuffer() = 0;
-    virtual Type::type getType() = 0;
+    virtual Type::type getType();
 };
 
 class isNull
@@ -22,8 +22,8 @@ protected:
     bool _null = false;
 public:
     virtual ~isNull() {}
-    virtual void setNull() = 0;
-    virtual bool getNull() = 0;
+    virtual void setNull();
+    virtual bool getNull();
 };
 
 template<typename T>
@@ -144,7 +144,7 @@ public:
     {
         this->_buffer = value->getBuffer();
     }
-    ByteBuffer& getBuffer()
+    ByteBuffer& getBuffer() override
     {
         return this->_buffer;
     }
@@ -190,7 +190,7 @@ public:
     {
         this->_buffer = value->getBuffer();
     }
-    ByteBuffer& getBuffer()
+    ByteBuffer& getBuffer() override
     {
         return this->_buffer;
     }
