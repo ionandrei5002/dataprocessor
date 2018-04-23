@@ -37,7 +37,7 @@ public:
     virtual uint64_t put(ByteBuffer& value) = 0;
     virtual ByteBuffer get(uint64_t offset, uint64_t type_size) = 0;
     virtual ViewByteBuffer getView(uint64_t offset, uint64_t type_size) = 0;
-    virtual void swap(uint64_t lv, uint64_t rv, uint64_t type_size) = 0;
+    virtual void swap(uint64_t lv, uint64_t rv, uint64_t type_size, char* tmp) = 0;
 };
 
 template<typename T>
@@ -66,15 +66,13 @@ public:
         ViewByteBuffer value(type_size, _data.get(offset));
         return value;
     }
-    void swap(uint64_t lv, uint64_t rv, uint64_t type_size) override
+    void swap(uint64_t lv, uint64_t rv, uint64_t type_size, char* tmp) override
     {
 //        std::cout << _data.size() << " " << lv << " " << rv << std::endl;
-        std::vector<char> tmp;
-        tmp.resize(type_size);
-        memcpy(tmp.data(), _data.get(lv), type_size);
+        memcpy(tmp, _data.get(lv), type_size);
 
         _data.rewrite(lv, type_size, _data.get(rv));
-        _data.rewrite(rv, type_size, tmp.data());
+        _data.rewrite(rv, type_size, tmp);
     }
 };
 
@@ -107,7 +105,7 @@ public:
     {
         return ViewByteBuffer(*_position.at(offset));
     }
-    void swap(uint64_t lv, uint64_t rv, uint64_t type_size) override
+    void swap(uint64_t lv, uint64_t rv, uint64_t type_size, char* tmp) override
     {}
 };
 
@@ -137,7 +135,8 @@ public:
     }
     void swap(uint64_t lv, uint64_t rv) override
     {
-        _store.swap((lv * sizeof(_type)), (rv * sizeof(_type)), sizeof(_type));
+        char tmp[sizeof(_type)];
+        _store.swap((lv * sizeof(_type)), (rv * sizeof(_type)), sizeof(_type), &tmp[0]);
     }
 };
 
